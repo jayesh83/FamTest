@@ -1,7 +1,9 @@
 package com.example.famtest.ui
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Spannable
@@ -15,14 +17,19 @@ import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat.getColor
 import androidx.core.text.toSpanned
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
+import com.bumptech.glide.GlideBuilder
 import com.example.famtest.R
 import com.example.famtest.data.api.FamService
 import com.example.famtest.data.model.Card
@@ -33,7 +40,9 @@ import com.example.famtest.data.repository.ContextualCardsRepository
 import com.example.famtest.state.ContextualCardsVM
 import com.example.famtest.state.ContextualCardsVmFactory
 import com.google.android.material.card.MaterialCardView
+import java.lang.Exception
 import kotlin.math.roundToInt
+
 
 class ContextualCardsFragment : Fragment() {
     private lateinit var viewModel: ContextualCardsVM
@@ -64,6 +73,7 @@ class ContextualCardsFragment : Fragment() {
         viewModel.contextualCards.observe(viewLifecycleOwner) {
             val totalCardGroups = it.card_groups.size
             linearLayoutContainer.removeAllViews()
+
             for (i in 0 until totalCardGroups) {
                 val totalInnerCards = it.card_groups[i].cards.size
 
@@ -74,7 +84,10 @@ class ContextualCardsFragment : Fragment() {
                             attachView(linearLayoutContainer, createSampleCard("Card no: ${i + j}"))
                         }
                         DesignType.SMALL_DISPLAY_CARD -> {
-                            attachView(linearLayoutContainer, smallDisplayCard(cardGroup.cards[j]))
+                            attachView(
+                                linearLayoutContainer,
+                                smallDisplayCard(cardGroup.cards[j], linearLayoutContainer)
+                            )
                         }
                         DesignType.IMAGE_CARD -> {
                             attachView(linearLayoutContainer, createSampleCard("Card no: ${i + j}"))
@@ -130,23 +143,52 @@ class ContextualCardsFragment : Fragment() {
         }
     }
 
-    private fun smallDisplayCard(card: Card): MaterialCardView {
-        val params = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.WRAP_CONTENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply {
-            this.setMargins(16.dp(), 16.dp(), 16.dp(), 16.dp())
+    private fun smallDisplayCard(card: Card, root: ViewGroup): CardView {
+        val view =
+            layoutInflater.inflate(R.layout.layout_small_display_card, root, false) as CardView
+
+        if (card.url != null)
+            view.setOnClickListener { openInBrowser(card.url) }
+
+        if (card.bg_color != null)
+            view.setCardBackgroundColor(parseColor(card.bg_color))
+
+        val title = (formattedText(card.formatted_title) ?: card.title) ?: "Title"
+        view.findViewById<TextView>(R.id.tv_small_dip_card_title).text = title
+
+        if (card.icon != null) {
+            if (card.icon.image_type == "ext" && card.icon.image_url != null) {
+                val iconView = view.findViewById<ImageView>(R.id.iv_small_dip_card_icon)
+                Glide.with(requireContext())
+                    .load(card.icon.image_url)
+                    .placeholder(R.color.purple_700)
+                    .error(R.color.design_default_color_error)
+                    .into(iconView)
+            }
+            if (card.icon.image_type == "asset" && card.icon.asset_type != null)
+                Log.e("YesIcon", "asset type ${card.icon.asset_type}")
         }
 
-        return MaterialCardView(requireContext()).apply {
-            val title = (formattedText(card.formatted_title) ?: card.title) ?: "Title"
-            this.addView(createText(title))
-            this.radius = 30f
-            this.elevation = 10f
-            this.maxCardElevation = 12f
-            this.isClickable = true
-            this.setCardBackgroundColor(Color.WHITE)
-            this.layoutParams = params
+        view.isClickable = true
+        return view
+    }
+
+    /*val backgroundImage = card.bg_image
+
+    if (backgroundImage != null) {
+        if (backgroundImage.image_type == "ext" && backgroundImage.image_url != null)
+            Log.e("BackgroundImage", "Yes")    // glide call to image_url
+        if (backgroundImage.image_type == "asset" && backgroundImage.asset_type != null)
+            Log.e("BackgroundImage", "Yes")    // load asset from resources
+    }*/
+
+    private fun parseColor(colorString: String): Int {
+        return try {
+            Color.parseColor(colorString)
+        } catch (e: IllegalArgumentException) {
+            getColor(requireContext(), R.color.design_default_color_surface)
+        } catch (e: Exception) {
+            getColor(requireContext(), R.color.design_default_color_surface)
         }
     }
 
@@ -183,7 +225,12 @@ class ContextualCardsFragment : Fragment() {
                             Log.e("Clicked", "yes") // TODO: Redirect to browser
                         }
                     }
-                    spans.setSpan(clickableSpan, 0, txtLength, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    spans.setSpan(
+                        clickableSpan,
+                        0,
+                        txtLength,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
                 }
 
                 if (fontStyle != null) {
@@ -224,5 +271,18 @@ class ContextualCardsFragment : Fragment() {
             this.toFloat(),
             displayMetrics
         ).roundToInt()
+    }
+
+    private fun openInBrowser(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
+        } catch (e: Exception) {
+            toast("Cannot open in browser")
+        }
+    }
+
+    private fun toast(text: String) {
+        Toast.makeText(requireContext().applicationContext, text, Toast.LENGTH_SHORT).show()
     }
 }
