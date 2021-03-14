@@ -37,7 +37,7 @@ data class Card(
     val bg_image: CardImage?,
     val bg_color: String?,
     val bg_gradient: Gradient?,
-    val cta: List<CallToAction>
+    val cta: List<CallToAction>?
 )
 
 data class CardImage(
@@ -49,7 +49,7 @@ data class CardImage(
 data class CallToAction(
     val text: String,
     val bg_color: String?,
-    val url: String?,
+    val url: String,
     val text_color: String?
 )
 

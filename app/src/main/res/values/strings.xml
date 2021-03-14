@@ -10,4 +10,8 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
     <string name="icon">icon</string>
+    <string name="image">image</string>
+    <string name="action">Action</string>
+    <string name="dismiss_now">Dismiss now</string>
+    <string name="remind_later">Remind Later</string>
 </resources>

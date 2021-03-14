@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_small_display_card"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
     android:padding="16dp"
@@ -11,10 +11,11 @@
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:id="@+id/ll_small_display_card"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="1">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/iv_small_dip_card_icon"
@@ -29,6 +30,7 @@
             android:layout_height="match_parent"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="16dp"
+            android:layout_weight="1"
             android:gravity="center_vertical"
             android:orientation="vertical">
 
@@ -50,5 +52,12 @@
                 android:visibility="gone"
                 tools:text="Description of title" />
         </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/icon"
+            android:src="@drawable/ic_chevron_right_24px" />
     </androidx.appcompat.widget.LinearLayoutCompat>
 </androidx.cardview.widget.CardView>
