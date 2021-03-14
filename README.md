@@ -18,3 +18,4 @@ I've been really fortunate to have this opportunity. Given my best.
 - I have already took so much of time, that's why didn't wanted to make it late even more.
 
 ## Screenshots
+<img src="./Screenshots/ss_1.jpeg" width="300" />____________<img src="./Screenshots/ss_2.jpeg" width="300" />
